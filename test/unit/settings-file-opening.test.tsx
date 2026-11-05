@@ -48,17 +48,30 @@ describe("file-viewer switch in settings", () => {
     });
     const input = () => renderer!.root.find((node) => typeof node.type === "string" &&
       node.props.accessibilityLabel === SETTINGS_STRINGS[language].nativeBlocksTitle && typeof node.props.onChangeText === "function");
-    expect(input().props.value).toBe("mermaid,drawio");
-    act(() => input().props.onChangeText(" PYTHON, "));
-    expect(input().props.value).toBe(" PYTHON, ");
-    expect(getEnhancerPreferences().nativeBlockLanguages).toBe("mermaid,drawio");
-    act(() => input().props.onChangeText(" PYTHON, Mermaid python "));
-    act(() => input().props.onBlur());
-    expect(getEnhancerPreferences().nativeBlockLanguages).toBe("python,mermaid");
-    expect(input().props.value).toBe("python,mermaid");
-    act(() => input().props.onChangeText(""));
+    const button = (label: string) => renderer!.root.find((node) => typeof node.type === "string" &&
+      node.props.accessibilityRole === "button" && node.props.accessibilityLabel === label);
+    const patterns = () => getEnhancerPreferences().nativeBlockLanguages;
+    const defaults = ["^mermaid$", "^drawio$"];
+    expect(patterns()).toEqual(defaults);
+    expect(input().props.value).toBe("");
+    act(() => input().props.onChangeText("["));
+    act(() => button(SETTINGS_STRINGS[language].nativeBlocksAdd).props.onPress());
+    expect(patterns()).toEqual(defaults);
+    expect(input().props.value).toBe("[");
+    expect(renderer!.root.findAll((node) => typeof node.type === "string" && node.props.accessibilityRole === "alert")).toHaveLength(1);
+    act(() => input().props.onChangeText("^DRAWIO(?:-xml)?$, "));
+    expect(input().props.value).toBe("^DRAWIO(?:-xml)?$, ");
+    expect(patterns()).toEqual(defaults);
+    act(() => input().props.onChangeText("^DRAWIO(?:-xml)?$"));
+    act(() => button(SETTINGS_STRINGS[language].nativeBlocksAdd).props.onPress());
+    expect(patterns()).toEqual([...defaults, "^DRAWIO(?:-xml)?$"]);
+    expect(input().props.value).toBe("");
+    for (let index = 0; index < 3; index++) {
+      act(() => button(`${SETTINGS_STRINGS[language].nativeBlocksRemove} 1`).props.onPress());
+    }
+    expect(patterns()).toEqual([]);
     act(() => input().props.onSubmitEditing());
-    expect(getEnhancerPreferences().nativeBlockLanguages).toBe("");
+    expect(patterns()).toEqual([]);
     const toggle = () => renderer!.root.find((node) => typeof node.type === "string" &&
       node.props.accessibilityRole === "switch" && node.props.accessibilityLabel === SETTINGS_STRINGS[language].fileOpeningTitle);
     expect(toggle().props.accessibilityState.checked).toBe(false);

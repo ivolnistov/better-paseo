@@ -351,8 +351,12 @@ Every tool call, notice and grouped call is one disclosure row (`DISCLOSURE_HEAD
   all-numeric columns right-aligned; sideways scroll with the indicator shown only while
   scrolling. The copy control is a 30 square at the top left (radius 12); on the web it opens to
   Copy as Markdown and Copy as image.
-- **Blocks handled by Paseo** is a host-shared language list, default `mermaid,drawio`.
-  Commas and whitespace separate case-insensitive exact names; an empty list disables it.
+- **Blocks handled by Paseo** is a host-shared regex list, default `^mermaid$` and `^drawio$`.
+  Add validates syntax before saving and keeps an invalid draft with an inline error; each entry
+  has a Remove button. Patterns preserve case and escapes and match case-insensitively against
+  only the first fence language label. Removing every entry disables the handoff. Legacy comma-
+  or whitespace-separated names migrate to escaped, anchored patterns; an empty string becomes
+  an empty list. Malformed persisted regexes are skipped when matching.
   The Markdown lexer recognizes fenced code, including nested and unfinished fences. Match
   the first info word; never inspect fence-looking text inside another code block. A match
   leaves the whole reply and footer to Paseo or another installed plugin. This is independent

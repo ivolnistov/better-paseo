@@ -217,12 +217,12 @@ describe("preferences read while the plugin loads", () => {
     expect(preferences.getEnhancerPreferences().fileOpeningMode).toBe("better-paseo");
     expect(transform("[File](notes.md)")).toBeDefined();
     const first = active()[0]!;
-    answer({ status: "ready", revision: "r1", values: { nativeBlockLanguages: "" } });
+    answer({ status: "ready", revision: "r1", values: { nativeBlockLanguages: [] } });
     await flush();
     expect(first.removed).toBe(true);
     expect(active()).toHaveLength(1);
     expect(transform(mermaid)).toBeDefined();
-    preferences.updateEnhancerPreferences({ nativeBlockLanguages: "drawio" });
+    preferences.updateEnhancerPreferences({ nativeBlockLanguages: ["^drawio(?:-xml)?$"] });
     const tool = "[external_agent_tool_result]\n```drawio\n<mxfile/>\n```\n[/external_agent_tool_result]\n";
     expect(transform(tool)).toMatchObject({ items: [{ kind: "omp-tool-call" }] });
     expect(transform(tool + "```drawio\n<mxfile/>\n```")).toBeUndefined();
@@ -232,14 +232,15 @@ describe("preferences read while the plugin loads", () => {
     expect(forwarded).toMatchObject({ items: [{ kind: "drawio-diagram" }] });
     expect(specialized).toHaveBeenCalledOnce();
 
+    expect(transform("```DRAWIO-xml metadata\n<mxfile/>")).toBeUndefined();
     expect(transform(mermaid)).toBeDefined();
-    preferences.updateEnhancerPreferences({ assistantMarkdown: false, nativeBlockLanguages: "" });
+    preferences.updateEnhancerPreferences({ assistantMarkdown: false, nativeBlockLanguages: [] });
     expect(transform("ordinary reply")).toBeUndefined();
     expect(active()).toHaveLength(1);
     cleanup();
     expect(plugin.registrations.every((entry) => entry.removed)).toBe(true);
     const count = plugin.registrations.length;
-    preferences.updateEnhancerPreferences({ assistantMarkdown: true, nativeBlockLanguages: "mermaid" });
+    preferences.updateEnhancerPreferences({ assistantMarkdown: true, nativeBlockLanguages: ["^mermaid$"] });
     expect(plugin.registrations).toHaveLength(count);
   });
 

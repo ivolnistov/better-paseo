@@ -16,9 +16,15 @@ import { z } from "zod";
  * default.
  */
 
-export const NATIVE_BLOCK_LANGUAGES_DEFAULT = "mermaid,drawio";
-export function normalizeNativeBlockLanguages(value: string): string {
-  return [...new Set(value.toLowerCase().split(/[,\s]+/).filter(Boolean))].join(",");
+export const NATIVE_BLOCK_LANGUAGES_DEFAULT = ["^mermaid$", "^drawio$"];
+export function normalizeNativeBlockLanguages(value: string | string[]): string[] {
+  if (Array.isArray(value)) return value;
+  return [...new Set(value.toLowerCase().split(/[,\s]+/).filter(Boolean))]
+    .map((name) => `^${name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`);
+}
+export function nativeBlockPatternError(pattern: string): string | null {
+  try { new RegExp(pattern, "i"); return null; }
+  catch (error) { return error instanceof Error ? error.message : String(error); }
 }
 
 export const ACCENT_IDS = ["host", "jade", "violet", "amber", "rose"] as const;
@@ -140,7 +146,7 @@ export const preferencesSchema = z.preprocess((raw) => migrateHoverDelay(migrate
   selectionActions: flag(true),
   assistantMarkdown: flag(true),
   fileOpeningMode: z.enum(["better-paseo", "paseo"]).catch("better-paseo"),
-  nativeBlockLanguages: z.string().catch(NATIVE_BLOCK_LANGUAGES_DEFAULT).transform(normalizeNativeBlockLanguages),
+  nativeBlockLanguages: z.union([z.string(), z.array(z.string())]).catch(NATIVE_BLOCK_LANGUAGES_DEFAULT).transform(normalizeNativeBlockLanguages),
   markdownVariant: z.enum(MARKDOWN_VARIANTS_STORED).catch("document"),
   rowLabelStyle: z.enum(ROW_LABEL_STYLES).catch("icon"),
   compactRowSpacing: flag(true),

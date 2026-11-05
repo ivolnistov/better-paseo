@@ -1,4 +1,4 @@
-import { normalizeNativeBlockLanguages } from "../shared/preferences-settings";
+import { nativeBlockPatternError } from "../shared/preferences-settings";
 import { useRpc } from "@getpaseo/plugin/client";
 import { hasUpdate, updateCheckRpc } from "../shared/update-check";
 import { openTerminalRpc, updateCommand } from "../shared/open-terminal";
@@ -132,30 +132,40 @@ function CustomMonoInput({ value, look }: { value: string; look: PageLook }) {
   );
 }
 
-function NativeBlocksInput({ value, look }: { value: string; look: PageLook }) {
+function NativeBlocksInput({ value, look }: { value: string[]; look: PageLook }) {
   const { tokens, t } = look;
-  const [draft, setDraft] = useState(value);
-  useEffect(() => setDraft(value), [value]);
-  const commit = () => {
-    const next = normalizeNativeBlockLanguages(draft);
-    setDraft(next);
-    if (next !== value) updateEnhancerPreferences({ nativeBlockLanguages: next });
+  const [draft, setDraft] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const add = () => {
+    const invalid = draft === "" ? t.nativeBlocksEmpty : nativeBlockPatternError(draft);
+    if (invalid) { setError(invalid); return; }
+    updateEnhancerPreferences({ nativeBlockLanguages: [...value, draft] });
+    setDraft("");
+    setError(null);
   };
-  return <TextInput
-    accessibilityLabel={t.nativeBlocksTitle}
-    value={draft}
-    onChangeText={setDraft}
-    onBlur={commit}
-    onSubmitEditing={commit}
-    placeholder="mermaid,drawio"
-    placeholderTextColor={tokens.foregroundSubtle}
-    autoCapitalize="none"
-    autoCorrect={false}
-    style={[styles.input, settingsTextStyle(tokens, -1), {
-      color: tokens.foreground, borderColor: tokens.v2.border,
-      backgroundColor: tokens.v2.surface0, fontFamily: tokens.fontMono,
-    }]}
-  />;
+  return <View style={{ gap: space.sm }}>
+    {value.map((pattern, index) => <View key={index} style={{ flexDirection: "row", alignItems: "center", gap: space.sm }}>
+      <Text style={[settingsTextStyle(tokens, -1), { color: tokens.foreground, fontFamily: tokens.fontMono, flex: 1 }]}>{pattern}</Text>
+      <PlainButton label={t.nativeBlocksRemove} accessibilityLabel={`${t.nativeBlocksRemove} ${index + 1}`}
+        onPress={() => updateEnhancerPreferences({ nativeBlockLanguages: value.filter((_, slot) => slot !== index) })} look={look} />
+    </View>)}
+    <TextInput
+      accessibilityLabel={t.nativeBlocksTitle}
+      value={draft}
+      onChangeText={(next) => { setDraft(next); setError(null); }}
+      onSubmitEditing={add}
+      placeholder="^mermaid$"
+      placeholderTextColor={tokens.foregroundSubtle}
+      autoCapitalize="none"
+      autoCorrect={false}
+      style={[styles.input, settingsTextStyle(tokens, -1), {
+        color: tokens.foreground, borderColor: tokens.v2.border,
+        backgroundColor: tokens.v2.surface0, fontFamily: tokens.fontMono,
+      }]}
+    />
+    {error ? <Text accessibilityRole="alert" style={[settingsTextStyle(tokens, -1), { color: tokens.danger }]}>{t.nativeBlocksInvalid}: {error}</Text> : null}
+    <PlainButton label={t.nativeBlocksAdd} onPress={add} look={look} />
+  </View>;
 }
 
 /** Seconds as the field shows them: `1`, `0.5`, never `1.0` or `0.30000000000000004`. */

@@ -10,7 +10,7 @@ describe("native fenced block routing", () => {
     "[Reference][x]\n\n```mermaid\ngraph TD",
     "```DRAWIO",
   ])("recognizes actual nested, complete and streaming fences: %s", (text) => {
-    expect(assistantNeedsNativeBlocks(text, " MERMAID, drawio ")).toBe(true);
+    expect(assistantNeedsNativeBlocks(text, ["^mermaid$", "^drawio$"])).toBe(true);
   });
   it.each([
     "`mermaid` and text saying ```drawio",
@@ -20,11 +20,17 @@ describe("native fenced block routing", () => {
     "    ```mermaid\n    graph TD\n    ```",
     "<pre>\n```mermaid\n</pre>",
   ])("ignores nonmatching blocks and fence markers inside samples: %s", (text) => {
-    expect(assistantNeedsNativeBlocks(text, "mermaid,drawio")).toBe(false);
+    expect(assistantNeedsNativeBlocks(text, ["^mermaid$", "^drawio$"])).toBe(false);
   });
-  it("supports custom exact names and an empty opt-out", () => {
-    expect(assistantNeedsNativeBlocks("~~~PYTHON title\npass", "python")).toBe(true);
-    expect(assistantNeedsNativeBlocks("```mermaid\ngraph TD", " , ")).toBe(false);
-    expect(assistantNeedsNativeBlocks("```mermaid\ngraph TD", "mer.*")).toBe(false);
+  it("matches case-insensitive regexes only against the first info word", () => {
+    const patterns = ["^drawio(?:-xml)?$"];
+    expect(assistantNeedsNativeBlocks("~~~DRAWIO-XML title\n<mxfile/>", patterns)).toBe(true);
+    expect(assistantNeedsNativeBlocks("~~~text drawio\n<mxfile/>", patterns)).toBe(false);
+    expect(assistantNeedsNativeBlocks("~~~text\ndrawio", patterns)).toBe(false);
+    expect(assistantNeedsNativeBlocks("```mermaid\ngraph TD", [])).toBe(false);
+    expect(assistantNeedsNativeBlocks("```mermaid\ngraph TD", ["["])).toBe(false);
+    expect(assistantNeedsNativeBlocks("```mermaid\ngraph TD", ["[", "^mermaid$"])).toBe(true);
+    expect(assistantNeedsNativeBlocks("```foo,bar\ndata", ["^foo,bar$"])).toBe(true);
+    expect(assistantNeedsNativeBlocks("```prefixdrawio\ndata", ["drawio"])).toBe(true);
   });
 });
