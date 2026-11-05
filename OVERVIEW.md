@@ -4,7 +4,7 @@ Tool calls start collapsed. The timeline offers syntax highlighting, streaming M
 
 ## Setup and settings
 
-Paseo 0.14.0 or later is required. No separate service account is needed. Settings control reply rendering, fonts, previews and the Tasks board, including an optional provider, model and prompt for title generation. Use Paseo's file viewer is off by default, keeping plugin reply handling and daemon-side desktop file opening; turning it on uses Paseo’s standard viewer for local-file replies. Turning off plugin Markdown uses Paseo for all replies, including Mermaid.
+Paseo 0.14.0 or later is required. No separate service account is needed. Settings control reply rendering, fonts, previews and the Tasks board, including an optional provider, model and prompt for title generation. Use Paseo's file viewer is off by default, keeping plugin reply handling and daemon-side desktop file opening; turning it on uses Paseo’s standard viewer for local-file replies. Blocks handled by Paseo defaults to `mermaid,drawio`: matching fenced replies go whole to Paseo or an installed handler; an empty list disables this. Turning off plugin Markdown uses Paseo for all replies.
 
 ## Data access and limits
 

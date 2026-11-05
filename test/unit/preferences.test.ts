@@ -34,6 +34,14 @@ const V1 = {
 };
 
 describe("preferences v2 defaults", () => {
+  it("defaults native block languages, normalizes lists and preserves empty opt-out", () => {
+    expect(DEFAULT_PREFERENCES.nativeBlockLanguages).toBe("mermaid,drawio");
+    expect(parsePreferences({}).nativeBlockLanguages).toBe("mermaid,drawio");
+    expect(parsePreferences({ nativeBlockLanguages: null }).nativeBlockLanguages).toBe("mermaid,drawio");
+    expect(parsePreferences({ nativeBlockLanguages: " MERMAID,drawio mermaid\nPYTHON " }).nativeBlockLanguages)
+      .toBe("mermaid,drawio,python");
+    expect(parsePreferences({ nativeBlockLanguages: "" }).nativeBlockLanguages).toBe("");
+  });
   it("defaults old or unknown file-opening choices to Better Paseo", () => {
     expect(DEFAULT_PREFERENCES.fileOpeningMode).toBe("better-paseo");
     const { fileOpeningMode: _mode, ...older } = storedPart(DEFAULT_PREFERENCES);
@@ -296,6 +304,18 @@ describe("daemon-backed store (S5 fix round 1)", () => {
     expect(persist).toHaveBeenLastCalledWith(expect.objectContaining({ detailsFontSize: 18 }));
     mod.resetEnhancerPreferences();
     expect(mod.getEnhancerPreferences().detailsFontSize).toBe(14);
+  });
+  it("persists native block lists, applies host changes and resets defaults", async () => {
+    const { mod, local } = await freshModule();
+    const persist = vi.fn();
+    mod.setPreferencePersister(persist);
+    mod.updateEnhancerPreferences({ nativeBlockLanguages: "python" });
+    expect(persist).toHaveBeenLastCalledWith(expect.objectContaining({ nativeBlockLanguages: "python" }));
+    expect(readStoredPreferences(local).nativeBlockLanguages).toBe("python");
+    mod.applyStoredPreferences({ ...storedPart(DEFAULT_PREFERENCES), nativeBlockLanguages: "" });
+    expect(mod.getEnhancerPreferences().nativeBlockLanguages).toBe("");
+    mod.resetEnhancerPreferences();
+    expect(mod.getEnhancerPreferences().nativeBlockLanguages).toBe("mermaid,drawio");
   });
   it("persists the file-opening mode, applies host changes and resets the default", async () => {
     const { mod, local } = await freshModule();

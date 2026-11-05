@@ -15,6 +15,7 @@ import { scheduleLoadTraceDump } from "./client/debug/load-trace";
 import { transformCompaction, transformToolCall } from "./client/tools/transform";
 import { agentMessageSchema } from "./client/tools/agent-message";
 import { assistantRows } from "./client/assistant-transform";
+import { assistantNeedsNativeBlocks } from "./client/assistant-native-blocks";
 import { assistantNeedsNativeFiles } from "./client/assistant-native-files";
 import { externalHistoryRows } from "./client/external-history";
 import { embeddedFontsRpc } from "./shared/font-rpc";
@@ -224,7 +225,7 @@ export default function contribute(client: PluginClientContext) {
   // transformer is registered again when it changes, so replies already shown
   // follow it too; a reply the plugin should not own is left to the host.
   const removeAssistantTransformer = followPreference("assistantMarkdown", () =>
-    followPreference("fileOpeningMode", () => addChatTransformer({
+    followPreference("fileOpeningMode", () => followPreference("nativeBlockLanguages", () => addChatTransformer({
       id: "omp-enhanced-assistant",
       query: { itemType: "assistant_message" },
       transform({ item, phase }) {
@@ -233,20 +234,23 @@ export default function contribute(client: PluginClientContext) {
         if (!preferences.assistantMarkdown) return undefined;
         if (!item.text.trim()) return undefined;
         const imported = externalHistoryRows(item.text, phase, item.messageId);
+        const needsNative = (text: string) =>
+          assistantNeedsNativeBlocks(text, preferences.nativeBlockLanguages) ||
+          (preferences.fileOpeningMode === "paseo" && assistantNeedsNativeFiles(text));
         // Imported tool output is source, not prose. Keep its specialized
-        // cards unless an actual prose row needs native file navigation.
-        const nativeFiles = preferences.fileOpeningMode === "paseo" && (imported
+        // cards unless an actual prose row needs the host renderer.
+        const nativeReply = imported
           ? imported.some((row) => {
             const data = row.data;
             return row.kind === "omp-assistant" && data !== null &&
               typeof data === "object" && !Array.isArray(data) &&
-              typeof data.text === "string" && assistantNeedsNativeFiles(data.text);
+              typeof data.text === "string" && needsNative(data.text);
           })
-          : assistantNeedsNativeFiles(item.text));
-        if (nativeFiles) return undefined;
+          : needsNative(item.text);
+        if (nativeReply) return undefined;
         return { items: imported ?? assistantRows(item.text, phase) };
       },
-    })),
+    }))),
   );
 
   const removeAssistantRenderer = client.addTimelineRenderer({

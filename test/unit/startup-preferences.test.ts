@@ -203,6 +203,46 @@ describe("preferences read while the plugin loads", () => {
     expect(plugin.registrations).toHaveLength(count);
   });
 
+  it("hands matching fences back independently and reprojects stored lists without leaks", async () => {
+    const { contribute, preferences } = await load();
+    let answer!: (value: unknown) => void;
+    const plugin = fakeClient(() => new Promise((resolve) => (answer = resolve)));
+    const cleanup = contribute(plugin.client as never);
+    const active = () => plugin.active("omp-enhanced-assistant");
+    const transform = (text: string, phase = "complete") => active()[0]!.transform({
+      item: { type: "assistant_message", text, messageId: "fence-test" }, phase,
+    });
+    const mermaid = "```mermaid\ngraph TD";
+    for (const phase of ["streaming", "complete"]) expect(transform(mermaid, phase)).toBeUndefined();
+    expect(preferences.getEnhancerPreferences().fileOpeningMode).toBe("better-paseo");
+    expect(transform("[File](notes.md)")).toBeDefined();
+    const first = active()[0]!;
+    answer({ status: "ready", revision: "r1", values: { nativeBlockLanguages: "" } });
+    await flush();
+    expect(first.removed).toBe(true);
+    expect(active()).toHaveLength(1);
+    expect(transform(mermaid)).toBeDefined();
+    preferences.updateEnhancerPreferences({ nativeBlockLanguages: "drawio" });
+    const tool = "[external_agent_tool_result]\n```drawio\n<mxfile/>\n```\n[/external_agent_tool_result]\n";
+    expect(transform(tool)).toMatchObject({ items: [{ kind: "omp-tool-call" }] });
+    expect(transform(tool + "```drawio\n<mxfile/>\n```")).toBeUndefined();
+    const specialized = vi.fn(() => ({ items: [{ kind: "drawio-diagram", data: { xml: "<mxfile/>" } }] }));
+    // Host transformer order: undefined lets the next plugin claim the item.
+    const forwarded = transform("```drawio\n<mxfile/>\n```") ?? specialized();
+    expect(forwarded).toMatchObject({ items: [{ kind: "drawio-diagram" }] });
+    expect(specialized).toHaveBeenCalledOnce();
+
+    expect(transform(mermaid)).toBeDefined();
+    preferences.updateEnhancerPreferences({ assistantMarkdown: false, nativeBlockLanguages: "" });
+    expect(transform("ordinary reply")).toBeUndefined();
+    expect(active()).toHaveLength(1);
+    cleanup();
+    expect(plugin.registrations.every((entry) => entry.removed)).toBe(true);
+    const count = plugin.registrations.length;
+    preferences.updateEnhancerPreferences({ assistantMarkdown: true, nativeBlockLanguages: "mermaid" });
+    expect(plugin.registrations).toHaveLength(count);
+  });
+
   it("registers nothing again when the record matches the defaults", async () => {
     const { contribute, preferences } = await load();
     const plugin = fakeClient(() =>

@@ -140,8 +140,10 @@ const en = {
     "Show token usage and a Copy button. Supported pasted images are displayed; other attachments stay with Paseo.",
   markdownTitle: "Plugin markdown for replies",
   markdownDescription:
-    "Headings, lists and highlighted code blocks drawn by the plugin. Use Paseo's file viewer to open local-file replies in Paseo. Turn off for mermaid diagrams or remote images.",
-  markdownTips: [{ label: "Supported", text: "Headings, lists and highlighted code blocks drawn by the plugin." }, { label: "Limitations", text: "Use Paseo's file viewer to open local-file replies in Paseo. Turn off for mermaid diagrams or remote images." }],
+    "Headings, lists and highlighted code blocks drawn by the plugin. Use Paseo's file viewer to open local-file replies in Paseo. Turn off for remote images.",
+  markdownTips: [{ label: "Supported", text: "Headings, lists and highlighted code blocks drawn by the plugin." }, { label: "Limitations", text: "Use Paseo's file viewer to open local-file replies in Paseo. Turn off for remote images." }],
+  nativeBlocksTitle: "Blocks handled by Paseo",
+  nativeBlocksDescription: "Comma- or space-separated fence languages (default: mermaid,drawio). A matching block hands the whole reply and footer to Paseo or an installed plugin. Leave empty to keep all blocks in Better Paseo. Independent of the file viewer switch.",
   fileOpeningTitle: "Use Paseo's file viewer",
   fileOpeningTips: [
     { label: "Off (default)", text: "Keep plugin rendering. Desktop links open on the daemon's computer; touch copies the path." },
@@ -347,8 +349,10 @@ const zh: SettingsStrings = {
   bubbleTitle: "增强提问气泡",
   bubbleDescription: "显示 token 用量和复制按钮；支持的粘贴图片一并显示，其他附件交给 Paseo。",
   markdownTitle: "回复使用插件 Markdown",
-  markdownDescription: "由插件绘制标题、列表和语法高亮代码块。开启“使用 Paseo 文件查看器”可在 Paseo 中打开含本地文件的回复。需要 mermaid 图表或远程图片时请关闭。",
-  markdownTips: [{ label: "支持内容", text: "由插件绘制标题、列表和语法高亮代码块。" }, { label: "使用限制", text: "开启“使用 Paseo 文件查看器”可在 Paseo 中打开含本地文件的回复。需要 mermaid 图表或远程图片时请关闭。" }],
+  markdownDescription: "由插件绘制标题、列表和语法高亮代码块。开启“使用 Paseo 文件查看器”可在 Paseo 中打开含本地文件的回复。需要远程图片时请关闭。",
+  markdownTips: [{ label: "支持内容", text: "由插件绘制标题、列表和语法高亮代码块。" }, { label: "使用限制", text: "开启“使用 Paseo 文件查看器”可在 Paseo 中打开含本地文件的回复。需要远程图片时请关闭。" }],
+  nativeBlocksTitle: "交给 Paseo 处理的代码块",
+  nativeBlocksDescription: "用逗号或空格分隔代码块语言（默认：mermaid,drawio）。匹配时，整条回复及信息栏交给 Paseo 或已安装的插件。留空则全部由 Better Paseo 处理。此设置独立于文件查看器开关。",
   fileOpeningTitle: "使用 Paseo 文件查看器",
   fileOpeningTips: [
     { label: "关闭（默认）", text: "保留插件渲染。桌面链接在 daemon 那台电脑上打开；触控设备上复制路径。" },

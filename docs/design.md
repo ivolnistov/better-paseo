@@ -351,6 +351,12 @@ Every tool call, notice and grouped call is one disclosure row (`DISCLOSURE_HEAD
   all-numeric columns right-aligned; sideways scroll with the indicator shown only while
   scrolling. The copy control is a 30 square at the top left (radius 12); on the web it opens to
   Copy as Markdown and Copy as image.
+- **Blocks handled by Paseo** is a host-shared language list, default `mermaid,drawio`.
+  Commas and whitespace separate case-insensitive exact names; an empty list disables it.
+  The Markdown lexer recognizes fenced code, including nested and unfinished fences. Match
+  the first info word; never inspect fence-looking text inside another code block. A match
+  leaves the whole reply and footer to Paseo or another installed plugin. This is independent
+  of file opening; completed imported history checks assistant prose rather than tool output.
 - Plugin paths (`PathText`, including tool controls): a pointer press opens or reveals the file
   on the daemon's machine, and hovering shows the full path after 400 ms with an underline; a tap
   copies the absolute path with a toast. Use Paseo's file viewer is off by default for replies;

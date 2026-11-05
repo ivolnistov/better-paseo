@@ -694,7 +694,13 @@ only their whole names, so `github` and `timeline` stay out.
   standard viewer, including its native footer, because plugins cannot open its file panel directly.
   In this mode, completed imported history checks prose only; tool-only paths keep their cards.
   A prose match hands back the entire message, so import markers may appear.
-- Turn **Plugin markdown for replies** off for mermaid diagrams or remote images.
+- **Blocks handled by Paseo** lists fence languages handed to Paseo or an installed plugin
+  (default: `mermaid,drawio`). Separate names with commas or whitespace; matching ignores case
+  and uses the first word after the opening fence. Leave it empty to disable this handoff.
+  A match hands back the whole reply, including its styling and footer, even while streaming.
+  Completed imported history checks prose only; tool payloads keep their cards. This setting is
+  independent of the file viewer switch. A specialized language needs a compatible renderer.
+- Turn **Plugin markdown for replies** off for remote images.
 
 | Table copy menu | Selected cell actions |
 | --- | --- |
@@ -1001,6 +1007,7 @@ and hides the Tool calls, Spacing, Messages and Hover previews groups. The Tasks
 | Spacing | Tight reply | On | Reduces the gap from 16pt to 4pt when a finished reply is followed by a plugin row, including a checklist. Turn off if they overlap. |
 | Messages | Enhanced prompt bubble | Off | Keeps Copy visible and shows the newest turn's token usage. Readable pasted images are drawn; prompts with other attachments stay with Paseo. Changing it updates existing prompts too. |
 | Messages | Plugin markdown for replies | On | Off uses Paseo for all replies, including mermaid diagrams and remote images. |
+| Messages | Blocks handled by Paseo | mermaid,drawio | Comma- or whitespace-separated fence languages. Matching replies use Paseo or an installed handler; empty disables. Shared by clients on this host. |
 | Messages | Use Paseo's file viewer | Off | Off keeps plugin reply rendering and daemon-side file opening; on uses Paseo's standard viewer and footer for local-file replies. Shared by clients on this host. |
 | Messages | Markdown style | Document | Document, Compact or Terminal (body in the code font). |
 | Messages | Selection toolbar | On | Web and desktop: Copy and Add to chat on selected text; the bar closes on scroll. |
@@ -1173,7 +1180,8 @@ The performance measurements above were made on Paseo 0.13.0 and have not been r
 | Symptom | What to do |
 | --- | --- |
 | Rows overlap, or a reply overlaps the row below | Turn off **Tight rows** or **Tight reply**. |
-| A reply needs a mermaid diagram or a remote image | Turn off **Plugin markdown for replies**. |
+| A reply needs a specialized fenced block | Include its language in **Blocks handled by Paseo** and ensure Paseo or an installed plugin supports it. |
+| A reply needs a remote image | Turn off **Plugin markdown for replies**. |
 | A selected table cell has no **Add to chat** action on a phone | Paseo does not yet let plugins write into the composer; **Copy selected** is always available. |
 | A prompt with an attachment should use Paseo's renderer | Turn off **Enhanced prompt bubble**. Attachments the plugin cannot render stay with Paseo automatically. |
 | Ctrl/Cmd+F misses old messages | Scroll up to load them, or hand replies back to Paseo as above. |

@@ -16,6 +16,11 @@ import { z } from "zod";
  * default.
  */
 
+export const NATIVE_BLOCK_LANGUAGES_DEFAULT = "mermaid,drawio";
+export function normalizeNativeBlockLanguages(value: string): string {
+  return [...new Set(value.toLowerCase().split(/[,\s]+/).filter(Boolean))].join(",");
+}
+
 export const ACCENT_IDS = ["host", "jade", "violet", "amber", "rose"] as const;
 /** Inline code text on iOS and Android, where the span has no fill. */
 export const INLINE_CODE_COLORS = ["grey", "blue", "violet", "green", "coral"] as const;
@@ -135,6 +140,7 @@ export const preferencesSchema = z.preprocess((raw) => migrateHoverDelay(migrate
   selectionActions: flag(true),
   assistantMarkdown: flag(true),
   fileOpeningMode: z.enum(["better-paseo", "paseo"]).catch("better-paseo"),
+  nativeBlockLanguages: z.string().catch(NATIVE_BLOCK_LANGUAGES_DEFAULT).transform(normalizeNativeBlockLanguages),
   markdownVariant: z.enum(MARKDOWN_VARIANTS_STORED).catch("document"),
   rowLabelStyle: z.enum(ROW_LABEL_STYLES).catch("icon"),
   compactRowSpacing: flag(true),

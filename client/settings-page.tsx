@@ -1,3 +1,4 @@
+import { normalizeNativeBlockLanguages } from "../shared/preferences-settings";
 import { useRpc } from "@getpaseo/plugin/client";
 import { hasUpdate, updateCheckRpc } from "../shared/update-check";
 import { openTerminalRpc, updateCommand } from "../shared/open-terminal";
@@ -129,6 +130,32 @@ function CustomMonoInput({ value, look }: { value: string; look: PageLook }) {
       ]}
     />
   );
+}
+
+function NativeBlocksInput({ value, look }: { value: string; look: PageLook }) {
+  const { tokens, t } = look;
+  const [draft, setDraft] = useState(value);
+  useEffect(() => setDraft(value), [value]);
+  const commit = () => {
+    const next = normalizeNativeBlockLanguages(draft);
+    setDraft(next);
+    if (next !== value) updateEnhancerPreferences({ nativeBlockLanguages: next });
+  };
+  return <TextInput
+    accessibilityLabel={t.nativeBlocksTitle}
+    value={draft}
+    onChangeText={setDraft}
+    onBlur={commit}
+    onSubmitEditing={commit}
+    placeholder="mermaid,drawio"
+    placeholderTextColor={tokens.foregroundSubtle}
+    autoCapitalize="none"
+    autoCorrect={false}
+    style={[styles.input, settingsTextStyle(tokens, -1), {
+      color: tokens.foreground, borderColor: tokens.v2.border,
+      backgroundColor: tokens.v2.surface0, fontFamily: tokens.fontMono,
+    }]}
+  />;
 }
 
 /** Seconds as the field shows them: `1`, `0.5`, never `1.0` or `0.30000000000000004`. */
@@ -993,6 +1020,14 @@ export function BetterPaseoSettingsPage({ theme, layout, host }: PluginSurfacePr
             />
           }
           look={look}
+          disabled={!preferences.assistantMarkdown}
+        />
+        <SettingRow
+          title={t.nativeBlocksTitle}
+          description={t.nativeBlocksDescription}
+          control={<NativeBlocksInput value={preferences.nativeBlockLanguages} look={look} />}
+          look={look}
+          stacked
           disabled={!preferences.assistantMarkdown}
         />
         <SettingRow

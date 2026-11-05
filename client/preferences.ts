@@ -142,6 +142,7 @@ export interface EnhancerPreferences {
   assistantMarkdown: boolean;
   /** Which renderer handles replies containing local files. */
   fileOpeningMode: StoredPreferences["fileOpeningMode"];
+  nativeBlockLanguages: string;
   /** Which look the markdown renderer uses. */
   markdownVariant: MarkdownVariantPreference;
   /**
@@ -226,6 +227,7 @@ export const DEFAULT_PREFERENCES: Readonly<EnhancerPreferences> = {
   selectionActions: true,
   assistantMarkdown: true,
   fileOpeningMode: "better-paseo",
+  nativeBlockLanguages: "mermaid,drawio",
   markdownVariant: "document",
   rowLabelStyle: "icon",
   compactRowSpacing: true,
