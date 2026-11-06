@@ -34,10 +34,10 @@ const V1 = {
 };
 
 describe("preferences v2 defaults", () => {
-  it("defaults native block patterns, migrates legacy lists and preserves empty opt-out", () => {
-    expect(DEFAULT_PREFERENCES.nativeBlockLanguages).toEqual(["^mermaid$", "^drawio$"]);
-    expect(parsePreferences({}).nativeBlockLanguages).toEqual(["^mermaid$", "^drawio$"]);
-    expect(parsePreferences({ nativeBlockLanguages: null }).nativeBlockLanguages).toEqual(["^mermaid$", "^drawio$"]);
+  it("starts with no native block patterns and preserves explicit and legacy lists", () => {
+    expect(DEFAULT_PREFERENCES.nativeBlockLanguages).toEqual([]);
+    expect(parsePreferences({}).nativeBlockLanguages).toEqual([]);
+    expect(parsePreferences({ nativeBlockLanguages: null }).nativeBlockLanguages).toEqual([]);
     expect(parsePreferences({ nativeBlockLanguages: " MERMAID,drawio mermaid\nPYTHON " }).nativeBlockLanguages)
       .toEqual(["^mermaid$", "^drawio$", "^python$"]);
     expect(parsePreferences({ nativeBlockLanguages: "" }).nativeBlockLanguages).toEqual([]);
@@ -319,7 +319,7 @@ describe("daemon-backed store (S5 fix round 1)", () => {
     mod.applyStoredPreferences({ ...storedPart(DEFAULT_PREFERENCES), nativeBlockLanguages: [] });
     expect(mod.getEnhancerPreferences().nativeBlockLanguages).toEqual([]);
     mod.resetEnhancerPreferences();
-    expect(mod.getEnhancerPreferences().nativeBlockLanguages).toEqual(["^mermaid$", "^drawio$"]);
+    expect(mod.getEnhancerPreferences().nativeBlockLanguages).toEqual([]);
   });
   it("persists the file-opening mode, applies host changes and resets the default", async () => {
     const { mod, local } = await freshModule();

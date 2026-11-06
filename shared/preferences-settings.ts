@@ -16,7 +16,7 @@ import { z } from "zod";
  * default.
  */
 
-export const NATIVE_BLOCK_LANGUAGES_DEFAULT = ["^mermaid$", "^drawio$"];
+export const NATIVE_BLOCK_LANGUAGES_DEFAULT: string[] = [];
 export function normalizeNativeBlockLanguages(value: string | string[]): string[] {
   if (Array.isArray(value)) return value;
   return [...new Set(value.toLowerCase().split(/[,\s]+/).filter(Boolean))]

@@ -227,7 +227,7 @@ export const DEFAULT_PREFERENCES: Readonly<EnhancerPreferences> = {
   selectionActions: true,
   assistantMarkdown: true,
   fileOpeningMode: "better-paseo",
-  nativeBlockLanguages: ["^mermaid$", "^drawio$"],
+  nativeBlockLanguages: [],
   markdownVariant: "document",
   rowLabelStyle: "icon",
   compactRowSpacing: true,
